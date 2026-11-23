@@ -1,0 +1,75 @@
+
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+
+function LoginPage() {
+    const [username, setUsername] = useState("");
+    const [password, setPassword] = useState("");
+    const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
+
+    const navigate = useNavigate();
+
+    const {login} = useAuth();
+
+    const handleLogin = async (event) => {
+        event.preventDefault();
+        setError("");
+        setLoading(true);
+
+        try {
+            await login({
+                username,
+                password
+            });
+
+            
+            navigate("/students", { replace: true });
+        } catch (err) {
+            setError(err.message || "Login failed");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <div className="auth-container">
+            <form className="auth-form" onSubmit={handleLogin}>
+                <h1>Welcome Back</h1>
+                <p>Login to your student dashboard</p>
+
+                <label>Username</label>
+                <input
+                    type="text"
+                    placeholder="Enter username"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    required
+                />
+
+                <label>Password</label>
+                <input
+                    type="password"
+                    placeholder="Enter password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                />
+
+                {error && <p className="error-message">{error}</p>}
+
+                <button type="submit" disabled={loading}>
+                    {loading ? "Logging in..." : "Login"}
+                </button>
+
+                <p>
+                    Don't have an account?{" "}
+                    <Link to="/register">Register</Link>
+                </p>
+            </form>
+        </div>
+    );
+}
+
+export default LoginPage;
