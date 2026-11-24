@@ -24,7 +24,6 @@ import Sidebar from "../components/Sidebar";
 import { useAuth } from "../context/AuthContext";
 import { apiRequest } from "../services/api";
 
-
 const announcements = [
   {
     title: "Mid Semester Exams",
@@ -46,68 +45,81 @@ const announcements = [
   }
 ];
 
-
 function Dashboard() {
-
   const { logout, user, isAdmin } = useAuth();
   const navigate = useNavigate();
 
   // Student data
   const [students, setStudents] = useState([]);
 
-  // Loading and error states
+  // Dashboard statistics
+  const [stats, setStats] = useState({
+    totalStudents: 0
+  });
+
+  // Loading states
   const [loadingStudents, setLoadingStudents] = useState(true);
+  const [loadingStats, setLoadingStats] = useState(true);
+
+  // Error states
   const [error, setError] = useState("");
+  const [statsError, setStatsError] = useState("");
 
   // Search state
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Fetch students from Spring Boot
-  useEffect(() => {
+  // Fetch student records
+  const fetchStudents = async () => {
+    try {
+      setLoadingStudents(true);
 
-    let cancelled = false;
+      const data = await apiRequest("/api/students");
 
-    const fetchStudents = async () => {
-
-      try {
-
-        setLoadingStudents(true);
-
-        const data = await apiRequest("/api/students");
-
-        if (!Array.isArray(data)) {
-          throw new Error("Invalid student data received from server.");
-        }
-
-        if (!cancelled) {
-          setStudents(data);
-          setError("");
-        }
-
-      } catch (err) {
-
-        if (!cancelled) {
-          setError(err.message || "Unable to load students.");
-        }
-
-      } finally {
-
-        if (!cancelled) {
-          setLoadingStudents(false);
-        }
-
+      if (!Array.isArray(data)) {
+        throw new Error("Invalid student data received from server.");
       }
 
-    };
+      setStudents(data);
+      setError("");
 
+    } catch (err) {
+      setError(err.message || "Unable to load students.");
+    } finally {
+      setLoadingStudents(false);
+    }
+  };
+
+  // Fetch dashboard statistics from Spring Boot
+  const fetchDashboardStats = async () => {
+    try {
+      setLoadingStats(true);
+
+      const data = await apiRequest("/api/dashboard/stats");
+
+      if (
+        !data ||
+        typeof data.totalStudents !== "number"
+      ) {
+        throw new Error("Invalid dashboard statistics received.");
+      }
+
+      setStats(data);
+      setStatsError("");
+
+    } catch (err) {
+      setStatsError(
+        err.message || "Unable to load dashboard statistics."
+      );
+    } finally {
+      setLoadingStats(false);
+    }
+  };
+
+  // Load both APIs
+  useEffect(() => {
     fetchStudents();
-
-    return () => {
-      cancelled = true;
-    };
-
+    fetchDashboardStats();
   }, []);
-
 
   // Logout
   const handleLogout = () => {
@@ -115,13 +127,11 @@ function Dashboard() {
     navigate("/login", { replace: true });
   };
 
-
   // Admin name
   const adminName =
     user?.username ||
     user?.name ||
     "Admin User";
-
 
   // Search students
   const filteredStudents = students.filter((student) =>
@@ -137,16 +147,15 @@ function Dashboard() {
       .includes(searchTerm.toLowerCase())
   );
 
-
   // Display maximum five students
   const displayedStudents = filteredStudents.slice(0, 5);
 
-
   // Dashboard statistics
-  const stats = [
+  const dashboardStats = [
     {
       title: "Total Students",
-      value: students.length,
+      value: stats.totalStudents,
+      loading: loadingStats,
       icon: Users,
       color: "blue",
       link: "/students",
@@ -178,34 +187,24 @@ function Dashboard() {
     }
   ];
 
-
   return (
-
     <div className="dashboard-layout">
 
       {/* SIDEBAR */}
-
       <Sidebar onLogout={handleLogout} />
 
-
       {/* MAIN CONTENT */}
-
       <main className="dashboard-main">
 
-
         {/* NAVBAR */}
-
         <header className="dashboard-navbar">
 
           <button className="mobile-menu" aria-label="Menu">
             ☰
           </button>
 
-
           {/* Search */}
-
           <div className="navbar-search">
-
             <Search size={19} />
 
             <input
@@ -214,12 +213,9 @@ function Dashboard() {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
-
           </div>
 
-
           {/* Profile */}
-
           <div className="navbar-right">
 
             <button
@@ -229,7 +225,6 @@ function Dashboard() {
               <Bell size={23} />
               <span className="notification-count">3</span>
             </button>
-
 
             <div className="admin-profile">
 
@@ -243,31 +238,22 @@ function Dashboard() {
               </div>
 
             </div>
-
           </div>
-
         </header>
 
-
-
         {/* DASHBOARD CONTENT */}
-
         <div className="dashboard-content">
 
-
           {/* HEADING */}
-
           <div className="dashboard-heading">
 
             <div>
-
               <h1>Dashboard</h1>
 
               <p>
                 Welcome back, <strong>{adminName}!</strong>
                 Here's what's happening in your system.
               </p>
-
             </div>
 
             <div className="heading-decoration">
@@ -277,18 +263,13 @@ function Dashboard() {
 
           </div>
 
-
-
           {/* STATISTICS */}
-
           <section className="stats-grid">
 
-            {stats.map((stat) => {
-
+            {dashboardStats.map((stat) => {
               const Icon = stat.icon;
 
               return (
-
                 <div className="stat-card" key={stat.title}>
 
                   <div className={`stat-icon ${stat.color}`}>
@@ -296,47 +277,37 @@ function Dashboard() {
                   </div>
 
                   <div className="stat-info">
-
                     <p>{stat.title}</p>
 
                     <h2>
-                      {stat.title === "Total Students" && loadingStudents
-                        ? "..."
-                        : stat.value}
+                      {stat.loading ? "..." : stat.value}
                     </h2>
-
                   </div>
 
                   <Link to={stat.link} className="stat-link">
-
                     {stat.linkText}
-
                     <ArrowRight size={16} />
-
                   </Link>
 
+                  {stat.title === "Total Students" && statsError && (
+                    <p className="error-message">
+                      Statistics unavailable
+                    </p>
+                  )}
+
                 </div>
-
               );
-
             })}
 
           </section>
 
-
-
           {/* MAIN GRID */}
-
           <section className="dashboard-grid">
 
-
             {/* STUDENT TABLE */}
-
             <div className="panel students-panel">
 
-
               <div className="panel-header">
-
                 <h3>Recent Students</h3>
 
                 {isAdmin && (
@@ -345,30 +316,25 @@ function Dashboard() {
                     Add Student
                   </Link>
                 )}
-
               </div>
 
-
               {/* Error message */}
-
               {error && (
                 <div className="error-message">
                   {error}
-                  <button onClick={() => window.location.reload()}>
+
+                  <button onClick={fetchStudents}>
                     Retry
                   </button>
                 </div>
               )}
 
-
               {/* Student Table */}
-
               <div className="table-responsive">
 
                 <table className="dashboard-table">
 
                   <thead>
-
                     <tr>
                       <th>ID</th>
                       <th>Name</th>
@@ -378,57 +344,39 @@ function Dashboard() {
 
                       {isAdmin && <th>Action</th>}
                     </tr>
-
                   </thead>
-
 
                   <tbody>
 
                     {loadingStudents ? (
-
                       <tr>
                         <td colSpan={isAdmin ? 6 : 5}>
                           Loading students...
                         </td>
                       </tr>
-
                     ) : error ? (
-
                       <tr>
                         <td colSpan={isAdmin ? 6 : 5}>
                           Unable to load student records.
                         </td>
                       </tr>
-
                     ) : displayedStudents.length === 0 ? (
-
                       <tr>
                         <td colSpan={isAdmin ? 6 : 5}>
                           No students found.
                         </td>
                       </tr>
-
                     ) : (
-
                       displayedStudents.map((student) => (
-
                         <tr key={student.id}>
-
                           <td>{student.id}</td>
-
                           <td>{student.name}</td>
-
                           <td>{student.classes}</td>
-
                           <td>{student.section}</td>
-
                           <td>{student.subject}</td>
 
-
                           {isAdmin && (
-
                             <td>
-
                               <div className="table-actions">
 
                                 <Link
@@ -448,68 +396,46 @@ function Dashboard() {
                                 </Link>
 
                               </div>
-
                             </td>
-
                           )}
-
                         </tr>
-
                       ))
-
                     )}
 
                   </tbody>
-
                 </table>
-
               </div>
 
-
               {/* VIEW ALL */}
-
               <Link to="/students" className="view-all-link">
-
                 View all students
-
                 <ArrowRight size={17} />
-
               </Link>
 
             </div>
 
-
-
             {/* RIGHT SECTION */}
-
             <div className="dashboard-right">
 
-
               {/* ANNOUNCEMENTS */}
-
               <div className="panel announcement-panel">
 
                 <div className="panel-header">
-
                   <h3>
                     <Megaphone size={19} />
                     Announcements
                   </h3>
 
                   <span>View all</span>
-
                 </div>
-
 
                 <div className="announcement-list">
 
                   {announcements.map((item) => (
-
                     <div
                       className="announcement-item"
                       key={item.title}
                     >
-
                       <div
                         className={`announcement-dot ${item.color}`}
                       />
@@ -517,35 +443,25 @@ function Dashboard() {
                       <div className="announcement-content">
 
                         <div className="announcement-title">
-
                           <strong>{item.title}</strong>
-
                           <span>{item.date}</span>
-
                         </div>
 
                         <p>{item.description}</p>
 
                       </div>
-
                     </div>
-
                   ))}
 
                 </div>
-
               </div>
 
-
-
               {/* QUICK ACTIONS */}
-
               <div className="panel quick-actions-panel">
 
                 <div className="panel-header">
                   <h3>Quick Actions</h3>
                 </div>
-
 
                 <div className="quick-actions-grid">
 
@@ -580,21 +496,14 @@ function Dashboard() {
                   </Link>
 
                 </div>
-
               </div>
 
             </div>
-
           </section>
-
         </div>
 
-
-
         {/* FOOTER */}
-
         <footer className="dashboard-footer">
-
           <span>
             © 2026 Student Management System. All rights reserved.
           </span>
@@ -602,16 +511,11 @@ function Dashboard() {
           <span>
             Developed with ❤️ by SMS Team
           </span>
-
         </footer>
 
       </main>
-
     </div>
-
   );
-
 }
-
 
 export default Dashboard;
