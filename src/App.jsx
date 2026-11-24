@@ -3,55 +3,78 @@ import {
     BrowserRouter,
     Routes,
     Route,
-    Navigate
+    Navigate,
+    useLocation
 } from "react-router-dom";
 
 import RegisterPage from "./pages/RegisterPage";
 import LoginPage from "./pages/LoginPage";
 import StudentPage from "./pages/StudentPage";
-import ProtectedRoute from "./components/ProtectedRoute";
+import Dashboard from "./pages/Dashboard";
 
-import "./App.css";
+import ProtectedRoute from "./components/ProtectedRoute";
 import Navbar from "./components/Navbar";
 
-function App() {
+import "./App.css";
+
+// Keep the old Navbar on the Students page only.
+// Dashboard has its own navbar.
+function AppRoutes() {
+    const location = useLocation();
+
     return (
-        <BrowserRouter>
+        <>
+            {location.pathname === "/students" && <Navbar />}
 
-
-            <Navbar/>
             <Routes>
-                {/* Open login page when the app starts */}
+
+                {/* Default page */}
                 <Route
                     path="/"
                     element={<Navigate to="/login" replace />}
                 />
 
-                {/* Public pages */}
-                <Route
-                    path="/register"
-                    element={<RegisterPage />}
-                />
-
+                {/* Public routes */}
                 <Route
                     path="/login"
                     element={<LoginPage />}
                 />
 
-                {/* Protected student dashboard */}
+                <Route
+                    path="/register"
+                    element={<RegisterPage />}
+                />
+
+                {/* Protected routes */}
                 <Route element={<ProtectedRoute />}>
+
+                    <Route
+                        path="/dashboard"
+                        element={<Dashboard />}
+                    />
+
                     <Route
                         path="/students"
                         element={<StudentPage />}
                     />
+
                 </Route>
 
-                {/* Unknown URLs go to login */}
+                {/* Unknown routes */}
                 <Route
                     path="*"
                     element={<Navigate to="/login" replace />}
                 />
+
             </Routes>
+        </>
+    );
+}
+
+function App() {
+    return (
+        <BrowserRouter>
+            <AppRoutes />
         </BrowserRouter>
     );
 }
