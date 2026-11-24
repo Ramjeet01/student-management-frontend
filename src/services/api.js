@@ -11,7 +11,10 @@ export async function apiRequest(path, options = {}) {
 
     const isPublicAuthRequest =
         path === "/auth/login" ||
-        path === "/auth/register";
+        path === "/auth/register" ||
+        path === "/auth/forgot-password" ||
+        path === "/auth/verify-otp" ||
+        path === "/auth/reset-password";
 
     if (token && !isPublicAuthRequest) {
         headers.Authorization = `Bearer ${token}`;
