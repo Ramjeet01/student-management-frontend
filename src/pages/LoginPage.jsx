@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import AuthSidebar from "../components/AuthSidebar";
 
 function LoginPage() {
     const [username, setUsername] = useState("");
@@ -35,6 +36,7 @@ function LoginPage() {
 
     return (
         <div className="auth-container">
+            <AuthSidebar/>
             <form className="auth-form" onSubmit={handleLogin}>
                 <h1>Welcome Back</h1>
                 <p>Login to your student dashboard</p>

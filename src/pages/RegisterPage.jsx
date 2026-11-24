@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { register } from "../services/authService";
+import AuthSidebar from "../components/AuthSidebar";
 
 function RegisterPage() {
     const [username, setUsername] = useState("");
@@ -33,6 +34,7 @@ function RegisterPage() {
 
     return (
         <div className="auth-container">
+            <AuthSidebar/>
             <form className="auth-form" onSubmit={handleRegister}>
                 <h1>Create Account</h1>
                 <p>Register for Student Management System</p>
