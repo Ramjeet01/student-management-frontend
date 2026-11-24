@@ -18,6 +18,7 @@ import Navbar from "./components/Navbar";
 import "./App.css";
 import CoursesPage from "./pages/CoursePage";
 import FacultyPage from "./pages/FacultyPage";
+import AttendancePage from "./pages/AttendencePage";
 
 // Keep the old Navbar on the Students page only.
 // Dashboard has its own navbar.
@@ -68,6 +69,11 @@ function AppRoutes() {
                     <Route 
                         path="/faculty" 
                         element={<FacultyPage/>} 
+                    />
+
+                    <Route 
+                        path="/attendance" 
+                        element={<AttendancePage/>} 
                     />
 
                 </Route>
