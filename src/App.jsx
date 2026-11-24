@@ -13,7 +13,6 @@ import StudentPage from "./pages/StudentPage";
 import Dashboard from "./pages/Dashboard";
 
 import ProtectedRoute from "./components/ProtectedRoute";
-import Navbar from "./components/Navbar";
 
 import "./App.css";
 import CoursesPage from "./pages/CoursePage";
@@ -27,7 +26,7 @@ function AppRoutes() {
 
     return (
         <>
-            {location.pathname === "/students" && <Navbar />}
+
 
             <Routes>
 
