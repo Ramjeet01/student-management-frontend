@@ -56,7 +56,8 @@ function Dashboard() {
   const [stats, setStats] = useState({
     totalStudents: 0,
     totalCourses:0,
-    totalFaculty:0
+    totalFaculty:0,
+    totalAttendance:0
   });
 
   // Loading states
@@ -100,7 +101,7 @@ function Dashboard() {
 
       if (
         !data ||
-        typeof data.totalStudents !== "number" || typeof data.totalCourses !== "number" || typeof data.totalFaculty !== "number"
+        typeof data.totalStudents !== "number" || typeof data.totalCourses !== "number" || typeof data.totalFaculty !== "number" || typeof data.totalAttendance !== "number"
       ) {
         throw new Error("Invalid dashboard statistics received.");
       }
@@ -183,9 +184,11 @@ function Dashboard() {
       link: "/faculty",
       linkText: "View all faculty"
     },
+    
     {
-      title: "Today's Attendance",
-      value: "—",
+      title: "Total Attendance",
+      value: stats.totalAttendance,
+      loading: loadingStats,
       icon: CalendarCheck,
       color: "orange",
       link: "/attendance",
