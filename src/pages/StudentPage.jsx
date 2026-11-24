@@ -8,7 +8,9 @@ import {
   Pencil,
   Trash2,
   Bell,
-  UserRound
+  UserRound,
+  Plus,
+  X
 } from "lucide-react";
 
 import StudentForm from "../components/StudentForm";
@@ -22,6 +24,7 @@ function StudentPage() {
 
   const [students, setStudents] = useState([]);
   const [editingStudent, setEditingStudent] = useState(null);
+  const [showForm, setShowForm] = useState(false);
   const [error, setError] = useState("");
   const [loadingStudents, setLoadingStudents] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -50,6 +53,13 @@ function StudentPage() {
     fetchStudents();
   }, []);
 
+  // Open Add Student form
+  const handleAdd = () => {
+    setEditingStudent(null);
+    setShowForm(true);
+    setError("");
+  };
+
   // Add student
   const addStudent = async (student) => {
     try {
@@ -59,6 +69,7 @@ function StudentPage() {
       });
 
       setStudents((prev) => [...prev, savedStudent]);
+      setShowForm(false);
       setError("");
     } catch (err) {
       setError(err.message || "Unable to add student.");
@@ -83,6 +94,7 @@ function StudentPage() {
       );
 
       setEditingStudent(null);
+      setShowForm(false);
       setError("");
     } catch (err) {
       setError(err.message || "Unable to update student.");
@@ -92,11 +104,20 @@ function StudentPage() {
   // Edit student
   const editStudent = (student) => {
     setEditingStudent(student);
+    setShowForm(true);
+    setError("");
 
     window.scrollTo({
       top: 0,
       behavior: "smooth"
     });
+  };
+
+  // Close form
+  const closeForm = () => {
+    setShowForm(false);
+    setEditingStudent(null);
+    setError("");
   };
 
   // Delete student
@@ -117,7 +138,7 @@ function StudentPage() {
       );
 
       if (editingStudent?.id === id) {
-        setEditingStudent(null);
+        closeForm();
       }
 
       setError("");
@@ -152,7 +173,7 @@ function StudentPage() {
       .includes(searchTerm.toLowerCase())
   );
 
-  // Wait for authentication
+  // Authentication loading
   if (loading) {
     return <p>Loading student management...</p>;
   }
@@ -216,12 +237,24 @@ function StudentPage() {
 
           {/* HEADING */}
           <div className="courses-heading">
+
             <div>
               <h1>Students Management</h1>
               <p>
                 Manage all students registered in your institution.
               </p>
             </div>
+
+            {isAdmin && (
+              <button
+                className="primary-btn"
+                onClick={handleAdd}
+              >
+                <Plus size={18} />
+                Add Student
+              </button>
+            )}
+
           </div>
 
           {/* STUDENT SUMMARY */}
@@ -245,24 +278,26 @@ function StudentPage() {
             </div>
           )}
 
-          {/* ADD / EDIT STUDENT FORM */}
-          {isAdmin && (
+          {/* ADD / EDIT FORM */}
+          {showForm && isAdmin && (
             <div className="course-form-panel">
+
               <div className="course-form-heading">
+
                 <h2>
                   {editingStudent
                     ? "Edit Student"
                     : "Add New Student"}
                 </h2>
 
-                {editingStudent && (
-                  <button
-                    type="button"
-                    onClick={() => setEditingStudent(null)}
-                  >
-                    Cancel Edit
-                  </button>
-                )}
+                <button
+                  type="button"
+                  onClick={closeForm}
+                  aria-label="Close form"
+                >
+                  <X size={20} />
+                </button>
+
               </div>
 
               <StudentForm
@@ -270,6 +305,15 @@ function StudentPage() {
                 updateStudent={updateStudent}
                 editingStudent={editingStudent}
               />
+
+              <button
+                type="button"
+                className="secondary-btn"
+                onClick={closeForm}
+              >
+                Cancel
+              </button>
+
             </div>
           )}
 
@@ -312,6 +356,7 @@ function StudentPage() {
                   ) : (
                     filteredStudents.map((student) => (
                       <tr key={student.id}>
+
                         <td>{student.id}</td>
                         <td>{student.name}</td>
                         <td>{student.classes}</td>
@@ -341,12 +386,14 @@ function StudentPage() {
                             </div>
                           </td>
                         )}
+
                       </tr>
                     ))
                   )}
 
                 </tbody>
               </table>
+
             </div>
           </div>
 

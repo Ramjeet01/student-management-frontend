@@ -1362,3 +1362,17 @@ button {
     grid-column: auto;
   }
 }
+.secondary-btn {
+  padding: 10px 18px;
+  margin-top: 15px;
+  border: 1px solid #dbe2ea;
+  border-radius: 7px;
+  background: white;
+  color: #334155;
+  cursor: pointer;
+  font: inherit;
+}
+
+.secondary-btn:hover {
+  background: #f1f5f9;
+}
