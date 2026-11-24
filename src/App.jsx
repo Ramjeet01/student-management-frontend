@@ -16,6 +16,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import Navbar from "./components/Navbar";
 
 import "./App.css";
+import CoursesPage from "./pages/CoursePage";
 
 // Keep the old Navbar on the Students page only.
 // Dashboard has its own navbar.
@@ -56,6 +57,11 @@ function AppRoutes() {
                     <Route
                         path="/students"
                         element={<StudentPage />}
+                    />
+
+                    <Route 
+                        path="/courses" 
+                        element={<CoursesPage />} 
                     />
 
                 </Route>

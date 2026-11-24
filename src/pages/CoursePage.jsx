@@ -1,0 +1,339 @@
+
+import React, { useEffect, useState } from "react";
+import { apiRequest } from "../services/api";
+import { useAuth } from "../context/AuthContext";
+import {
+  Plus,
+  Search,
+  Pencil,
+  Trash2,
+  BookOpen,
+  X
+} from "lucide-react";
+
+function CoursesPage() {
+  const { isAdmin } = useAuth();
+
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [editingId, setEditingId] = useState(null);
+  const [showForm, setShowForm] = useState(false);
+
+  const emptyForm = {
+    courseName: "",
+    courseCode: "",
+    duration: "",
+    description: ""
+  };
+
+  const [form, setForm] = useState(emptyForm);
+
+  // Fetch courses
+  const fetchCourses = async () => {
+    try {
+      setLoading(true);
+      const data = await apiRequest("/api/courses");
+
+      if (!Array.isArray(data)) {
+        throw new Error("Invalid course data received.");
+      }
+
+      setCourses(data);
+      setError("");
+    } catch (err) {
+      setError(err.message || "Unable to load courses.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCourses();
+  }, []);
+
+  // Form input
+  const handleChange = (e) => {
+    setForm({
+      ...form,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  // Open add form
+  const handleAdd = () => {
+    setEditingId(null);
+    setForm(emptyForm);
+    setShowForm(true);
+    setError("");
+  };
+
+  // Open edit form
+  const handleEdit = (course) => {
+    setEditingId(course.id);
+
+    setForm({
+      courseName: course.courseName || "",
+      courseCode: course.courseCode || "",
+      duration: course.duration || "",
+      description: course.description || ""
+    });
+
+    setShowForm(true);
+    setError("");
+  };
+
+  // Save course
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      if (editingId) {
+        const updated = await apiRequest(
+          `/api/courses/${editingId}`,
+          {
+            method: "PUT",
+            body: JSON.stringify(form)
+          }
+        );
+
+        setCourses((prev) =>
+          prev.map((course) =>
+            course.id === editingId ? updated : course
+          )
+        );
+      } else {
+        const saved = await apiRequest(
+          "/api/courses",
+          {
+            method: "POST",
+            body: JSON.stringify(form)
+          }
+        );
+
+        setCourses((prev) => [...prev, saved]);
+      }
+
+      setForm(emptyForm);
+      setEditingId(null);
+      setShowForm(false);
+      setError("");
+    } catch (err) {
+      setError(err.message || "Unable to save course.");
+    }
+  };
+
+  // Delete course
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this course?")) {
+      return;
+    }
+
+    try {
+      await apiRequest(`/api/courses/${id}`, {
+        method: "DELETE"
+      });
+
+      setCourses((prev) =>
+        prev.filter((course) => course.id !== id)
+      );
+
+      setError("");
+    } catch (err) {
+      setError(err.message || "Unable to delete course.");
+    }
+  };
+
+  // Search
+  const filteredCourses = courses.filter((course) =>
+    [
+      course.courseName,
+      course.courseCode,
+      course.duration
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase())
+  );
+
+  return (
+    <div className="courses-page">
+
+      <div className="courses-heading">
+        <div>
+          <h1>Courses Management</h1>
+          <p>Manage all courses offered by your institution.</p>
+        </div>
+
+        {isAdmin && (
+          <button className="primary-btn" onClick={handleAdd}>
+            <Plus size={18} />
+            Add Course
+          </button>
+        )}
+      </div>
+
+      <div className="courses-summary">
+        <BookOpen size={28} />
+        <div>
+          <span>Total Courses</span>
+          <h2>{courses.length}</h2>
+        </div>
+      </div>
+
+      {error && (
+        <div className="error-message">
+          {error}
+          <button onClick={fetchCourses}>Retry</button>
+        </div>
+      )}
+
+      {showForm && isAdmin && (
+        <div className="course-form-panel">
+
+          <div className="course-form-heading">
+            <h2>{editingId ? "Edit Course" : "Add New Course"}</h2>
+
+            <button
+              type="button"
+              onClick={() => setShowForm(false)}
+              aria-label="Close form"
+            >
+              <X size={20} />
+            </button>
+          </div>
+
+          <form onSubmit={handleSubmit} className="course-form">
+
+            <input
+              name="courseName"
+              placeholder="Course Name"
+              value={form.courseName}
+              onChange={handleChange}
+              required
+            />
+
+            <input
+              name="courseCode"
+              placeholder="Course Code"
+              value={form.courseCode}
+              onChange={handleChange}
+              required
+            />
+
+            <input
+              name="duration"
+              placeholder="Duration (e.g. 4 Years)"
+              value={form.duration}
+              onChange={handleChange}
+            />
+
+            <textarea
+              name="description"
+              placeholder="Course Description"
+              value={form.description}
+              onChange={handleChange}
+              rows="3"
+            />
+
+            <button type="submit" className="primary-btn">
+              {editingId ? "Update Course" : "Save Course"}
+            </button>
+
+          </form>
+        </div>
+      )}
+
+      <div className="courses-table-panel">
+
+        <div className="courses-toolbar">
+          <h2>All Courses</h2>
+
+          <div className="navbar-search">
+            <Search size={18} />
+
+            <input
+              placeholder="Search courses..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+        </div>
+
+        <div className="table-responsive">
+
+          <table className="dashboard-table">
+
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Course Name</th>
+                <th>Course Code</th>
+                <th>Duration</th>
+                <th>Description</th>
+                {isAdmin && <th>Actions</th>}
+              </tr>
+            </thead>
+
+            <tbody>
+
+              {loading ? (
+                <tr>
+                  <td colSpan={isAdmin ? 6 : 5}>
+                    Loading courses...
+                  </td>
+                </tr>
+              ) : filteredCourses.length === 0 ? (
+                <tr>
+                  <td colSpan={isAdmin ? 6 : 5}>
+                    No courses found.
+                  </td>
+                </tr>
+              ) : (
+                filteredCourses.map((course) => (
+                  <tr key={course.id}>
+                    <td>{course.id}</td>
+                    <td>{course.courseName}</td>
+                    <td>{course.courseCode}</td>
+                    <td>{course.duration}</td>
+                    <td>{course.description}</td>
+
+                    {isAdmin && (
+                      <td>
+                        <div className="table-actions">
+
+                          <button
+                            className="edit-btn"
+                            onClick={() => handleEdit(course)}
+                            title="Edit course"
+                          >
+                            <Pencil size={16} />
+                          </button>
+
+                          <button
+                            className="delete-btn"
+                            onClick={() => handleDelete(course.id)}
+                            title="Delete course"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+
+                        </div>
+                      </td>
+                    )}
+                  </tr>
+                ))
+              )}
+
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+  );
+}
+
+export default CoursesPage;
