@@ -6,6 +6,7 @@ import AuthSidebar from "../components/AuthSidebar";
 
 function RegisterPage() {
     const [username, setUsername] = useState("");
+    const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
@@ -18,8 +19,9 @@ function RegisterPage() {
         setLoading(true);
 
         try {
-            const response = await register({
+            await register({
                 username,
+                email,
                 password
             });
 
@@ -34,7 +36,7 @@ function RegisterPage() {
 
     return (
         <div className="auth-container">
-            <AuthSidebar/>
+            <AuthSidebar />
             <form className="auth-form" onSubmit={handleRegister}>
                 <h1>Create Account</h1>
                 <p>Register for Student Management System</p>
@@ -48,12 +50,22 @@ function RegisterPage() {
                     required
                 />
 
+                <label>Email</label>
+                <input
+                    type="email"
+                    placeholder="Enter your email address"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                />
+
                 <label>Password</label>
                 <input
                     type="password"
-                    placeholder="Create password"
+                    placeholder="Create password (minimum 8 characters)"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    minLength={8}
                     required
                 />
 

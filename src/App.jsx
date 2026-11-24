@@ -18,6 +18,9 @@ import "./App.css";
 import CoursesPage from "./pages/CoursePage";
 import FacultyPage from "./pages/FacultyPage";
 import AttendancePage from "./pages/AttendencePage";
+import ForgotPassword from "./pages/ForgotPassword";
+import VerifyOtp from "./pages/VerifyOtp";
+import ResetPassword from "./pages/ResetPassword";
 
 // Keep the old Navbar on the Students page only.
 // Dashboard has its own navbar.
@@ -45,6 +48,21 @@ function AppRoutes() {
                 <Route
                     path="/register"
                     element={<RegisterPage />}
+                />
+
+                <Route
+                    path="/forgot-password"
+                    element={<ForgotPassword />}
+                />
+
+                <Route
+                    path="/verify-otp"
+                    element={<VerifyOtp />}
+                />
+
+                <Route
+                    path="/reset-password"
+                    element={<ResetPassword/>}
                 />
 
                 {/* Protected routes */}

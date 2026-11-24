@@ -11,8 +11,7 @@ function LoginPage() {
     const [loading, setLoading] = useState(false);
 
     const navigate = useNavigate();
-
-    const {login} = useAuth();
+    const { login } = useAuth();
 
     const handleLogin = async (event) => {
         event.preventDefault();
@@ -25,7 +24,6 @@ function LoginPage() {
                 password
             });
 
-            
             navigate("/dashboard", { replace: true });
         } catch (err) {
             setError(err.message || "Login failed");
@@ -36,7 +34,7 @@ function LoginPage() {
 
     return (
         <div className="auth-container">
-            <AuthSidebar/>
+            <AuthSidebar />
             <form className="auth-form" onSubmit={handleLogin}>
                 <h1>Welcome Back</h1>
                 <p>Login to your student dashboard</p>
@@ -58,6 +56,12 @@ function LoginPage() {
                     onChange={(e) => setPassword(e.target.value)}
                     required
                 />
+
+                <p style={{ textAlign: "right", marginTop: "8px" }}>
+                    <Link to="/forgot-password">
+                        Forgot Password?
+                    </Link>
+                </p>
 
                 {error && <p className="error-message">{error}</p>}
 
