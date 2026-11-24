@@ -228,13 +228,6 @@ function StudentPage() {
                 </span>
               </div>
 
-              <button
-                className="logout-button"
-                onClick={handleLogout}
-              >
-                Logout
-              </button>
-
             </div>
           </div>
         </header>

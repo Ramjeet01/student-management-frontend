@@ -1486,22 +1486,43 @@ button {
     grid-template-columns: 1fr;
   }
 }
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
 
-.logout-button {
-  margin-left: 15px;
-  padding: 9px 16px;
-  background: linear-gradient(135deg, #2563eb, #7c3aed);
-  color: white;
+.sidebar-menu {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.sidebar-logout {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: calc(100% - 30px);
+  margin: auto 15px 20px;
+  padding: 13px 16px;
   border: none;
-  border-radius: 7px;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.12);
+  color: white;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
-  transition: 0.3s ease;
+  text-align: left;
 }
 
-.logout-button:hover {
-  background: linear-gradient(135deg, #1d4ed8, #6d28d9);
-  transform: translateY(-1px);
+.sidebar-logout:hover {
+  background: rgba(255, 255, 255, 0.24);
 }
+
+.sidebar-collapsed .sidebar-logout {
+  justify-content: center;
+  width: calc(100% - 20px);
+  margin: auto 10px 20px;
+  padding: 13px 0;
+}
+
 

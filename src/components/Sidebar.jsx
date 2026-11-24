@@ -13,8 +13,7 @@ import {
   IndianRupee,
   PieChart,
   Settings,
-  LogOut,
-  Menu
+  LogOut
 } from "lucide-react";
 
 const menuItems = [
@@ -33,12 +32,16 @@ const menuItems = [
 function Sidebar({ onLogout, collapsed = false }) {
   return (
     <aside className={`sidebar ${collapsed ? "sidebar-collapsed" : ""}`}>
+
       <div className="sidebar-logo">
         <GraduationCap size={43} strokeWidth={2.5} />
-        <div className="logo-text">
-          <h2>SMS</h2>
-          <span>Student Management System</span>
-        </div>
+
+        {!collapsed && (
+          <div className="logo-text">
+            <h2>SMS</h2>
+            <span>Student Management System</span>
+          </div>
+        )}
       </div>
 
       <div className="sidebar-menu">
@@ -62,10 +65,16 @@ function Sidebar({ onLogout, collapsed = false }) {
         })}
       </div>
 
-      <button className="sidebar-logout" onClick={onLogout}>
+      <button
+        type="button"
+        className="sidebar-logout"
+        onClick={onLogout}
+        title={collapsed ? "Logout" : ""}
+      >
         <LogOut size={23} />
         {!collapsed && <span>Logout</span>}
       </button>
+
     </aside>
   );
 }
