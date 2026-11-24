@@ -152,19 +152,22 @@ function Dashboard() {
   const displayedStudents = filteredStudents.slice(0, 5);
 
   // Dashboard statistics
+
   const dashboardStats = [
+    {
+
+      title: "Total Students",
+      value: stats.totalStudents,
+      loading: loadingStats,
+      icon: Users,
+      color: "blue",
+      link: "/students",
+      linkText: "View all students"
+    },
     {
       title: "Total Courses",
       value: stats.totalCourses,
       loading: loadingStats,
-      icon: BookOpen,
-      color: "green",
-      link: "/courses",
-      linkText: "View all courses"
-    },,
-    {
-      title: "Total Courses",
-      value: "—",
       icon: BookOpen,
       color: "green",
       link: "/courses",
@@ -187,6 +190,7 @@ function Dashboard() {
       linkText: "View attendance"
     }
   ];
+
 
   return (
     <div className="dashboard-layout">
