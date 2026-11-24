@@ -207,93 +207,239 @@ select {
 }
 
 
-/* ---------- 4. LOGIN / REGISTER PAGES ---------- */
+/* ---------- 4. LOGIN / REGISTER PAGES ----------
+   Split-screen layout: form on the left, illustration panel on the right.
+   Replace your whole old section 4 with this block.
+   No JSX changes are required.
+------------------------------------------------ */
+
+/* Remove leftover React/Vite starter styles that push the page off-centre */
+#root {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+}
+
+body {
+  display: block;
+  place-items: initial;
+}
+
+/* Change these three values to re-colour both pages */
+:root {
+  --auth-accent: #62459a;
+  --auth-accent-dark: #4f3680;
+  --auth-panel: #a78bdf;
+}
+
+
+/* ----- Right panel: purple with doodle pattern + illustration ----- */
+
+body .auth-sidebar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: auto;
+  width: 50%;
+  min-width: 0;
+  height: 100vh;
+  padding: 0;
+  display: block;
+  overflow: hidden;
+  z-index: 5;
+  border: none;
+
+  background-color: var(--auth-panel);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160' fill='none' stroke='rgba(255,255,255,0.30)' stroke-width='1.5' stroke-linecap='round'%3E%3Ccircle cx='20' cy='24' r='5'/%3E%3Cpath d='M70 18l8 8M78 18l-8 8'/%3E%3Cpath d='M120 30h16'/%3E%3Ccircle cx='140' cy='90' r='4'/%3E%3Cpath d='M30 80l8 8M38 80l-8 8'/%3E%3Cpath d='M80 70h14'/%3E%3Ccircle cx='90' cy='130' r='5'/%3E%3Cpath d='M20 130h14'/%3E%3Cpath d='M130 135l7 7M137 135l-7 7'/%3E%3C/svg%3E");
+  background-size: 160px 160px;
+}
+
+/* Illustration: graduation cap on a monitor, floating cards and squiggles */
+body .auth-sidebar::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 110px;
+  left: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 420 400'%3E%3Cg fill='none' stroke='white' stroke-width='3' stroke-linecap='round'%3E%3Cpath d='M18 300q10-14 20 0t20 0t20 0'/%3E%3Cpath d='M340 250q10-14 20 0t20 0t20 0'/%3E%3C/g%3E%3Crect x='50' y='100' width='320' height='210' rx='26' fill='rgb(24,18,48)'/%3E%3Crect x='170' y='310' width='80' height='36' fill='rgb(221,214,254)'/%3E%3Crect x='120' y='344' width='180' height='14' rx='7' fill='rgb(221,214,254)'/%3E%3Cpath d='M210 140L295 178L210 216L125 178Z' fill='white'/%3E%3Cpath d='M165 200v34c0 16 90 16 90 0v-34l-45 20z' fill='rgb(196,181,253)'/%3E%3Cpath d='M295 178v52' stroke='white' stroke-width='4' stroke-linecap='round'/%3E%3Ccircle cx='295' cy='236' r='6' fill='white'/%3E%3Ccircle cx='82' cy='104' r='36' fill='white' stroke='rgb(221,214,254)' stroke-width='6'/%3E%3Cpath d='M66 104l12 12l22-26' fill='none' stroke='rgb(98,69,154)' stroke-width='6' stroke-linecap='round' stroke-linejoin='round'/%3E%3Crect x='320' y='60' width='86' height='46' rx='12' fill='rgb(221,214,254)'/%3E%3Cpath d='M336 76h40M336 90h24' stroke='rgb(98,69,154)' stroke-width='5' stroke-linecap='round'/%3E%3Crect x='14' y='190' width='70' height='40' rx='12' fill='rgb(221,214,254)'/%3E%3Ccircle cx='34' cy='210' r='8' fill='rgb(98,69,154)'/%3E%3Cpath d='M50 205h22M50 216h14' stroke='rgb(98,69,154)' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center 55%;
+  background-size: min(78%, 540px) auto;
+}
+
+/* Tagline under the illustration */
+body .auth-sidebar::after {
+  content: "Manage students, courses and attendance in one place.";
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  bottom: 56px;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.5;
+  color: #fff;
+}
+
+
+/* ----- Logo: top-left of the white side ----- */
+
+body .auth-sidebar .sidebar-logo {
+  position: fixed;
+  top: 28px;
+  left: 40px;
+  z-index: 20;
+  height: auto;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  text-align: left;
+  gap: 12px;
+  padding: 0;
+  background: none;
+  border: none;
+  box-shadow: none;
+  backdrop-filter: none;
+  color: var(--auth-accent);
+}
+
+body .auth-sidebar .sidebar-logo svg {
+  width: 40px;
+  height: 40px;
+  color: var(--auth-accent);
+}
+
+body .auth-sidebar .logo-text h2 {
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: 0.5px;
+  color: var(--auth-accent);
+}
+
+body .auth-sidebar .logo-text span {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+
+/* ----- Left side: white area with the form ----- */
 
 .auth-container {
+  width: 50%;
   min-height: 100vh;
-  margin-left: 260px;
-  padding: 24px;
+  margin: 0;
+  padding: 110px 40px 40px;
   display: flex;
   justify-content: center;
   align-items: center;
-  background:
-    radial-gradient(circle at 20% 15%, rgba(37, 99, 235, 0.10), transparent 40%),
-    radial-gradient(circle at 85% 85%, rgba(124, 58, 237, 0.10), transparent 40%),
-    var(--bg);
+  background: #fff;
 }
 
 .auth-form {
   width: 100%;
-  max-width: 460px;
-  padding: 40px 36px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  box-shadow: var(--shadow-lg);
+  max-width: 415px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
 }
 
 .auth-form h1 {
-  margin-bottom: 6px;
-  text-align: center;
-  font-size: 28px;
-  font-weight: 700;
-  color: var(--navy);
+  margin-bottom: 8px;
+  text-align: left;
+  font-size: 36px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: #000;
 }
 
 .auth-form > p {
-  margin-bottom: 8px;
-  text-align: center;
-  color: var(--text-muted);
-  font-size: 15px;
+  margin-bottom: 26px;
+  text-align: left;
+  font-size: 16px;
+  color: #8a8a99;
 }
 
 .auth-form label {
   display: block;
-  margin: 18px 0 7px;
-  font-size: 14px;
-  font-weight: 600;
-  color: #334155;
+  margin: 20px 0 8px;
+  font-size: 15px;
+  font-weight: 500;
+  color: #111827;
 }
 
 .auth-form input {
   width: 100%;
-  padding: 12px 14px;
-  background: #f8fafc;
-  color: var(--text);
-  border: 1px solid #cbd5e1;
-  border-radius: var(--radius-sm);
+  height: 48px;
+  padding: 0 14px;
+  background: #fff;
+  color: #111827;
+  border: 1px solid #d9d9e3;
+  border-radius: 6px;
   font-size: 15px;
-  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .auth-form input::placeholder {
-  color: #94a3b8;
+  color: #a8a8b8;
 }
 
 .auth-form input:focus {
   outline: none;
-  background: #fff;
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+  border-color: var(--auth-accent);
+  box-shadow: 0 0 0 3px rgba(98, 69, 154, 0.15);
 }
 
+/* Optional row: "Remember me" + "Forgot password" */
+.auth-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  font-size: 15px;
+  color: #111827;
+}
+
+.auth-options label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+.auth-options input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--auth-accent);
+}
+
+/* Main button */
 .auth-form button {
   width: 100%;
-  margin-top: 24px;
-  padding: 12px;
-  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  height: 48px;
+  margin-top: 28px;
+  padding: 0 16px;
+  background: var(--auth-accent);
   color: #fff;
   border: none;
-  border-radius: var(--radius-sm);
+  border-radius: 6px;
   font-size: 16px;
   font-weight: 600;
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: none;
+  transition: background 0.2s;
 }
 
 .auth-form button:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
+  background: var(--auth-accent-dark);
+  transform: none;
+  box-shadow: none;
 }
 
 .auth-form button:disabled {
@@ -301,72 +447,82 @@ select {
   cursor: not-allowed;
 }
 
-.auth-form a {
-  color: var(--primary);
-  font-weight: 600;
+/* Optional outlined button, e.g. <button className="google-btn"> */
+.auth-form button.google-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 16px;
+  background: #fff;
+  color: #111827;
+  border: 1px solid #d9d9e3;
 }
 
-.auth-form a:hover {
+.auth-form button.google-btn:hover:not(:disabled) {
+  background: #f8f8fb;
+}
+
+/* Links */
+.auth-form a {
+  color: var(--auth-accent);
+  font-weight: 500;
   text-decoration: underline;
 }
 
-/* Text under the button ("Already have an account?") */
+.auth-form a:hover {
+  color: var(--auth-accent-dark);
+}
+
+/* "Don't have an account?" line under the button */
 .auth-form button + p,
 .auth-form p:last-child {
-  margin-top: 18px;
+  margin-top: 22px;
   text-align: center;
-  color: var(--text-muted);
-  font-size: 14px;
+  font-size: 15px;
+  color: #8a8a99;
 }
 
-/* Branding sidebar shown beside login / register */
-.auth-sidebar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 260px;
-  height: 100vh;
-  min-height: 100vh;
-  padding-top: 40px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background: var(--surface);
-  border-right: 1px solid var(--border);
-  z-index: 10;
+
+/* ----- Responsive ----- */
+
+@media (max-width: 1000px) {
+  body .auth-sidebar::after {
+    font-size: 16px;
+    bottom: 40px;
+  }
 }
 
-.auth-sidebar .sidebar-logo {
-  height: auto;
-  flex-direction: column;
-  text-align: center;
-  gap: 10px;
-  padding: 20px;
-  border-bottom: none;
-}
+/* Tablet / phone: hide the illustration, keep the logo on top */
+@media (max-width: 860px) {
+  body .auth-sidebar {
+    position: static;
+    width: 100%;
+    height: auto;
+    padding: 22px 20px 0;
+    background: #fff;
+    background-image: none;
+  }
 
-.auth-sidebar .logo-text h2 {
-  font-size: 30px;
-}
-
-.auth-sidebar .logo-text span {
-  font-size: 13px;
-}
-
-@media (max-width: 768px) {
-  .auth-sidebar {
+  body .auth-sidebar::before,
+  body .auth-sidebar::after {
     display: none;
   }
 
-  .auth-container {
-    margin-left: 0;
+  body .auth-sidebar .sidebar-logo {
+    position: static;
   }
 
-  .auth-form {
-    padding: 30px 22px;
+  .auth-container {
+    width: 100%;
+    min-height: auto;
+    padding: 32px 20px 48px;
+  }
+
+  .auth-form h1 {
+    font-size: 30px;
   }
 }
-
 
 /* ---------- 5. TOP NAVBAR (simple pages) ---------- */
 
