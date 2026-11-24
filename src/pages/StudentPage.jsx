@@ -1,190 +1,371 @@
 
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+import {
+  Users,
+  Search,
+  Pencil,
+  Trash2,
+  Bell,
+  UserRound
+} from "lucide-react";
+
 import StudentForm from "../components/StudentForm";
+import Sidebar from "../components/Sidebar";
 import { apiRequest } from "../services/api";
 import { useAuth } from "../context/AuthContext";
 
 function StudentPage() {
+  const { isAdmin, loading, logout, user } = useAuth();
+  const navigate = useNavigate();
 
-    const { isAdmin, loading } = useAuth();
+  const [students, setStudents] = useState([]);
+  const [editingStudent, setEditingStudent] = useState(null);
+  const [error, setError] = useState("");
+  const [loadingStudents, setLoadingStudents] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
 
-    const [students, setStudents] = useState([]);
-    const [editingStudent, setEditingStudent] = useState(null);
-    const [error, setError] = useState("");
+  // Fetch all students
+  const fetchStudents = async () => {
+    try {
+      setLoadingStudents(true);
 
-    // GET ALL STUDENTS
-    const fetchStudents = async () => {
-        try {
-            const data = await apiRequest("/api/students");
-            setStudents(data);
-            setError("");
-        } catch (err) {
-            setError(err.message);
-        }
-    };
+      const data = await apiRequest("/api/students");
 
-    useEffect(() => {
-        fetchStudents();
-    }, []);
+      if (!Array.isArray(data)) {
+        throw new Error("Invalid student data received.");
+      }
 
-    // ADD STUDENT
-    const addStudent = async (student) => {
-        try {
-            const savedStudent = await apiRequest("/api/students", {
-                method: "POST",
-                body: JSON.stringify(student),
-            });
-
-            setStudents((prev) => [...prev, savedStudent]);
-            setError("");
-        } catch (err) {
-            setError(err.message);
-        }
-    };
-
-    // UPDATE STUDENT
-    const updateStudent = async (updatedStudent) => {
-        try {
-            const updated = await apiRequest(
-                `/api/students/${updatedStudent.id}`,
-                {
-                    method: "PUT",
-                    body: JSON.stringify(updatedStudent),
-                }
-            );
-
-            setStudents((prev) =>
-                prev.map((student) =>
-                    student.id === updated.id ? updated : student
-                )
-            );
-
-            setEditingStudent(null);
-            setError("");
-        } catch (err) {
-            setError(err.message);
-        }
-    };
-
-    // EDIT STUDENT
-    const editStudent = (student) => {
-        setEditingStudent(student);
-    };
-
-    // DELETE STUDENT
-    const deleteStudent = async (id) => {
-        try {
-            await apiRequest(`/api/students/${id}`, {
-                method: "DELETE",
-            });
-
-            setStudents((prev) =>
-                prev.filter((student) => student.id !== id)
-            );
-
-            setError("");
-        } catch (err) {
-            setError(err.message);
-        }
-    };
-
-    // Wait until authentication/profile loading finishes
-    if (loading) {
-        return <p>Loading student management...</p>;
+      setStudents(data);
+      setError("");
+    } catch (err) {
+      setError(err.message || "Unable to load students.");
+    } finally {
+      setLoadingStudents(false);
     }
+  };
 
-    return (
-        <div>
+  useEffect(() => {
+    fetchStudents();
+  }, []);
 
-            <h1>Student Management Table</h1>
+  // Add student
+  const addStudent = async (student) => {
+    try {
+      const savedStudent = await apiRequest("/api/students", {
+        method: "POST",
+        body: JSON.stringify(student)
+      });
 
-            {/* Only ADMIN can see the form */}
-            {isAdmin && (
-                <StudentForm
-                    addStudent={addStudent}
-                    updateStudent={updateStudent}
-                    editingStudent={editingStudent}
-                />
-            )}
+      setStudents((prev) => [...prev, savedStudent]);
+      setError("");
+    } catch (err) {
+      setError(err.message || "Unable to add student.");
+    }
+  };
 
-            <h2>Student Table</h2>
+  // Update student
+  const updateStudent = async (updatedStudent) => {
+    try {
+      const updated = await apiRequest(
+        `/api/students/${updatedStudent.id}`,
+        {
+          method: "PUT",
+          body: JSON.stringify(updatedStudent)
+        }
+      );
 
-            {error && (
-                <p className="error-message">{error}</p>
-            )}
+      setStudents((prev) =>
+        prev.map((student) =>
+          student.id === updated.id ? updated : student
+        )
+      );
 
-            <div className="table-container">
-                <table>
+      setEditingStudent(null);
+      setError("");
+    } catch (err) {
+      setError(err.message || "Unable to update student.");
+    }
+  };
 
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Name</th>
-                            <th>Class</th>
-                            <th>Section</th>
-                            <th>Subject</th>
+  // Edit student
+  const editStudent = (student) => {
+    setEditingStudent(student);
 
-                            {/* Only ADMIN sees action columns */}
-                            {isAdmin && (
-                                <>
-                                    <th>Edit</th>
-                                    <th>Delete</th>
-                                </>
-                            )}
-                        </tr>
-                    </thead>
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+  };
 
-                    <tbody>
+  // Delete student
+  const deleteStudent = async (id) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this student?"
+    );
 
-                        {students.map((student) => (
+    if (!confirmed) return;
 
-                            <tr key={student.id}>
+    try {
+      await apiRequest(`/api/students/${id}`, {
+        method: "DELETE"
+      });
 
-                                <td>{student.id}</td>
-                                <td>{student.name}</td>
-                                <td>{student.classes}</td>
-                                <td>{student.section}</td>
-                                <td>{student.subject}</td>
+      setStudents((prev) =>
+        prev.filter((student) => student.id !== id)
+      );
 
-                                {isAdmin && (
-                                    <>
-                                        <td>
-                                            <button
-                                                onClick={() => editStudent(student)}
-                                            >
-                                                Edit
-                                            </button>
-                                        </td>
+      if (editingStudent?.id === id) {
+        setEditingStudent(null);
+      }
 
-                                        <td>
-                                            <button
-                                                onClick={() => deleteStudent(student.id)}
-                                            >
-                                                Delete
-                                            </button>
-                                        </td>
-                                    </>
-                                )}
+      setError("");
+    } catch (err) {
+      setError(err.message || "Unable to delete student.");
+    }
+  };
 
-                            </tr>
+  // Logout
+  const handleLogout = () => {
+    logout();
+    navigate("/login", { replace: true });
+  };
 
-                        ))}
+  // Admin name
+  const adminName =
+    user?.username ||
+    user?.name ||
+    "Admin User";
 
-                        {students.length === 0 && (
-                            <tr>
-                                <td colSpan={isAdmin ? 7 : 5}>
-                                    No students found.
-                                </td>
-                            </tr>
-                        )}
+  // Search students
+  const filteredStudents = students.filter((student) =>
+    [
+      student.name,
+      student.classes,
+      student.section,
+      student.subject
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase())
+  );
 
-                    </tbody>
+  // Wait for authentication
+  if (loading) {
+    return <p>Loading student management...</p>;
+  }
 
-                </table>
+  return (
+    <div className="dashboard-layout">
+
+      {/* SIDEBAR */}
+      <Sidebar onLogout={handleLogout} />
+
+      {/* MAIN CONTENT */}
+      <main className="dashboard-main">
+
+        {/* NAVBAR */}
+        <header className="dashboard-navbar">
+
+          <button className="mobile-menu" aria-label="Menu">
+            ☰
+          </button>
+
+          <div className="navbar-search">
+            <Search size={19} />
+
+            <input
+              type="text"
+              placeholder="Search students..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+
+          <div className="navbar-right">
+
+            <button
+              className="notification-btn"
+              aria-label="Notifications"
+            >
+              <Bell size={23} />
+              <span className="notification-count">3</span>
+            </button>
+
+            <div className="admin-profile">
+
+              <div className="admin-avatar">
+                <UserRound size={25} />
+              </div>
+
+              <div>
+                <h4>{adminName}</h4>
+                <span>
+                  {isAdmin ? "Administrator" : "User"}
+                </span>
+              </div>
+
+            </div>
+          </div>
+        </header>
+
+        {/* STUDENT CONTENT */}
+        <div className="dashboard-content courses-page">
+
+          {/* HEADING */}
+          <div className="courses-heading">
+            <div>
+              <h1>Students Management</h1>
+              <p>
+                Manage all students registered in your institution.
+              </p>
+            </div>
+          </div>
+
+          {/* STUDENT SUMMARY */}
+          <div className="courses-summary">
+            <Users size={28} />
+
+            <div>
+              <span>Total Students</span>
+              <h2>{students.length}</h2>
+            </div>
+          </div>
+
+          {/* ERROR MESSAGE */}
+          {error && (
+            <div className="error-message">
+              {error}
+
+              <button onClick={fetchStudents}>
+                Retry
+              </button>
+            </div>
+          )}
+
+          {/* ADD / EDIT STUDENT FORM */}
+          {isAdmin && (
+            <div className="course-form-panel">
+              <div className="course-form-heading">
+                <h2>
+                  {editingStudent
+                    ? "Edit Student"
+                    : "Add New Student"}
+                </h2>
+
+                {editingStudent && (
+                  <button
+                    type="button"
+                    onClick={() => setEditingStudent(null)}
+                  >
+                    Cancel Edit
+                  </button>
+                )}
+              </div>
+
+              <StudentForm
+                addStudent={addStudent}
+                updateStudent={updateStudent}
+                editingStudent={editingStudent}
+              />
+            </div>
+          )}
+
+          {/* STUDENT TABLE */}
+          <div className="panel courses-table-panel">
+
+            <div className="panel-header courses-toolbar">
+              <h3>All Students</h3>
             </div>
 
+            <div className="table-responsive">
+
+              <table className="dashboard-table">
+
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Class</th>
+                    <th>Section</th>
+                    <th>Subject</th>
+                    {isAdmin && <th>Actions</th>}
+                  </tr>
+                </thead>
+
+                <tbody>
+
+                  {loadingStudents ? (
+                    <tr>
+                      <td colSpan={isAdmin ? 6 : 5}>
+                        Loading students...
+                      </td>
+                    </tr>
+                  ) : filteredStudents.length === 0 ? (
+                    <tr>
+                      <td colSpan={isAdmin ? 6 : 5}>
+                        No students found.
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredStudents.map((student) => (
+                      <tr key={student.id}>
+                        <td>{student.id}</td>
+                        <td>{student.name}</td>
+                        <td>{student.classes}</td>
+                        <td>{student.section}</td>
+                        <td>{student.subject}</td>
+
+                        {isAdmin && (
+                          <td>
+                            <div className="table-actions">
+
+                              <button
+                                className="edit-btn"
+                                onClick={() => editStudent(student)}
+                                title="Edit student"
+                              >
+                                <Pencil size={16} />
+                              </button>
+
+                              <button
+                                className="delete-btn"
+                                onClick={() => deleteStudent(student.id)}
+                                title="Delete student"
+                              >
+                                <Trash2 size={16} />
+                              </button>
+
+                            </div>
+                          </td>
+                        )}
+                      </tr>
+                    ))
+                  )}
+
+                </tbody>
+              </table>
+            </div>
+          </div>
+
         </div>
-    );
+
+        {/* FOOTER */}
+        <footer className="dashboard-footer">
+          <span>
+            © 2026 Student Management System. All rights reserved.
+          </span>
+
+          <span>
+            Developed with ❤️ by SMS Team
+          </span>
+        </footer>
+
+      </main>
+    </div>
+  );
 }
 
 export default StudentPage;
