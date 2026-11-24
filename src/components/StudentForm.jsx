@@ -1,87 +1,102 @@
+
 import { useEffect, useState } from "react";
 
-function StudentForm({addStudent, editingStudent, updateStudent}){
+function StudentForm({ addStudent, editingStudent, updateStudent }) {
 
-    const[name,setName] = useState("");
-    const[classes,setClasses ] = useState("");
-    const[section,setSection] = useState("");
-    const[subject,setSubject] = useState("");
+  const [name, setName] = useState("");
+  const [classes, setClasses] = useState("");
+  const [section, setSection] = useState("");
+  const [subject, setSubject] = useState("");
 
-    useEffect(() => {
-        if(editingStudent){
-            setName(editingStudent.name);
-            setClasses(editingStudent.classes);
-            setSection(editingStudent.section);
-            setSubject(editingStudent.subject);
-        }
-    },[editingStudent]);
-
-    const handleSubmit = (event) => {
-        event.preventDefault();
-
-        const newObj ={
-            name,
-            classes,
-            section,
-            subject
-
-        };
-
-        if(editingStudent){
-            updateStudent({
-                id:editingStudent.id,
-                ...newObj
-            });
-        }else{
-            addStudent(newObj);
-        }
-
-        
-
-        setName("");
-        setClasses("");
-        setSection("");
-        setSubject("");
+  useEffect(() => {
+    if (editingStudent) {
+      setName(editingStudent.name || "");
+      setClasses(editingStudent.classes || "");
+      setSection(editingStudent.section || "");
+      setSubject(editingStudent.subject || "");
+    } else {
+      resetForm();
     }
+  }, [editingStudent]);
 
+  const resetForm = () => {
+    setName("");
+    setClasses("");
+    setSection("");
+    setSubject("");
+  };
 
-    return(
-        <form className = "form-box" onSubmit={handleSubmit}>
-            <label>Name</label>
-            <input 
-                type="text" 
-                placeholder="Enter Name" 
-                value={name} 
-                onChange={(event) => setName(event.target.value)}
-            />
+  const handleSubmit = async (event) => {
+    event.preventDefault();
 
-            <label>Class</label>
-            <input 
-                type="text"     
-                placeholder="Enter Name" 
-                value={classes} 
-                onChange={(event) => setClasses(event.target.value)}
-            />
+    const studentData = {
+      name,
+      classes,
+      section,
+      subject
+    };
 
-            <label>Section</label>
-            <input 
-                type="text" 
-                placeholder="Enter Name" 
-                value={section} 
-                onChange={(event) => setSection(event.target.value)}
-            />
+    try {
+      if (editingStudent) {
+        await updateStudent({
+          id: editingStudent.id,
+          ...studentData
+        });
+      } else {
+        await addStudent(studentData);
+      }
 
-            <label>Subject</label>
-            <input 
-                type="text" 
-                placeholder="Enter Name" 
-                value={subject} 
-                onChange={(event) => setSubject(event.target.value)}
-            />
+      resetForm();
+    } catch (error) {
+      console.error("Student form submission failed:", error);
+    }
+  };
 
-            <button type="submit">{editingStudent ? "Update" : "Add Student"}</button>
+  return (
+    <form className="course-form" onSubmit={handleSubmit}>
 
-        </form>
-    );
+      <input
+        type="text"
+        name="name"
+        placeholder="Student Name"
+        value={name}
+        onChange={(event) => setName(event.target.value)}
+        required
+      />
+
+      <input
+        type="text"
+        name="classes"
+        placeholder="Class"
+        value={classes}
+        onChange={(event) => setClasses(event.target.value)}
+        required
+      />
+
+      <input
+        type="text"
+        name="section"
+        placeholder="Section"
+        value={section}
+        onChange={(event) => setSection(event.target.value)}
+        required
+      />
+
+      <input
+        type="text"
+        name="subject"
+        placeholder="Subject"
+        value={subject}
+        onChange={(event) => setSubject(event.target.value)}
+        required
+      />
+
+      <button type="submit" className="primary-btn">
+        {editingStudent ? "Update Student" : "Save Student"}
+      </button>
+
+    </form>
+  );
 }
+
 export default StudentForm;
