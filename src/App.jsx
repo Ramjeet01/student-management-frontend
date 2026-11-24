@@ -31,7 +31,7 @@ function AppRoutes() {
                 {/* Default page */}
                 <Route
                     path="/"
-                    element={<Navigate to="/login" replace />}
+                    element={<Navigate to="/dashboard" replace />}
                 />
 
                 {/* Public routes */}

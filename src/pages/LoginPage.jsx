@@ -25,7 +25,7 @@ function LoginPage() {
             });
 
             
-            navigate("/students", { replace: true });
+            navigate("/dashboard", { replace: true });
         } catch (err) {
             setError(err.message || "Login failed");
         } finally {
