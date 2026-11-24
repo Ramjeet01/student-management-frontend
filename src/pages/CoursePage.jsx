@@ -1,18 +1,25 @@
 
 import React, { useEffect, useState } from "react";
-import { apiRequest } from "../services/api";
-import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
+
 import {
   Plus,
   Search,
   Pencil,
   Trash2,
   BookOpen,
-  X
+  X,
+  Bell,
+  UserRound
 } from "lucide-react";
 
+import Sidebar from "../components/Sidebar";
+import { useAuth } from "../context/AuthContext";
+import { apiRequest } from "../services/api";
+
 function CoursesPage() {
-  const { isAdmin } = useAuth();
+  const { logout, user, isAdmin } = useAuth();
+  const navigate = useNavigate();
 
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -34,6 +41,7 @@ function CoursesPage() {
   const fetchCourses = async () => {
     try {
       setLoading(true);
+
       const data = await apiRequest("/api/courses");
 
       if (!Array.isArray(data)) {
@@ -53,7 +61,19 @@ function CoursesPage() {
     fetchCourses();
   }, []);
 
-  // Form input
+  // Logout
+  const handleLogout = () => {
+    logout();
+    navigate("/login", { replace: true });
+  };
+
+  // Admin name
+  const adminName =
+    user?.username ||
+    user?.name ||
+    "Admin User";
+
+  // Form input changes
   const handleChange = (e) => {
     setForm({
       ...form,
@@ -84,12 +104,12 @@ function CoursesPage() {
     setError("");
   };
 
-  // Save course
+  // Save or update course
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      if (editingId) {
+      if (editingId !== null) {
         const updated = await apiRequest(
           `/api/courses/${editingId}`,
           {
@@ -145,12 +165,13 @@ function CoursesPage() {
     }
   };
 
-  // Search
+  // Search courses
   const filteredCourses = courses.filter((course) =>
     [
       course.courseName,
       course.courseCode,
-      course.duration
+      course.duration,
+      course.description
     ]
       .filter(Boolean)
       .join(" ")
@@ -159,179 +180,256 @@ function CoursesPage() {
   );
 
   return (
-    <div className="courses-page">
+    <div className="dashboard-layout">
 
-      <div className="courses-heading">
-        <div>
-          <h1>Courses Management</h1>
-          <p>Manage all courses offered by your institution.</p>
-        </div>
+      {/* SIDEBAR */}
+      <Sidebar onLogout={handleLogout} />
 
-        {isAdmin && (
-          <button className="primary-btn" onClick={handleAdd}>
-            <Plus size={18} />
-            Add Course
+      {/* MAIN CONTENT */}
+      <main className="dashboard-main">
+
+        {/* NAVBAR */}
+        <header className="dashboard-navbar">
+
+          <button className="mobile-menu" aria-label="Menu">
+            ☰
           </button>
-        )}
-      </div>
-
-      <div className="courses-summary">
-        <BookOpen size={28} />
-        <div>
-          <span>Total Courses</span>
-          <h2>{courses.length}</h2>
-        </div>
-      </div>
-
-      {error && (
-        <div className="error-message">
-          {error}
-          <button onClick={fetchCourses}>Retry</button>
-        </div>
-      )}
-
-      {showForm && isAdmin && (
-        <div className="course-form-panel">
-
-          <div className="course-form-heading">
-            <h2>{editingId ? "Edit Course" : "Add New Course"}</h2>
-
-            <button
-              type="button"
-              onClick={() => setShowForm(false)}
-              aria-label="Close form"
-            >
-              <X size={20} />
-            </button>
-          </div>
-
-          <form onSubmit={handleSubmit} className="course-form">
-
-            <input
-              name="courseName"
-              placeholder="Course Name"
-              value={form.courseName}
-              onChange={handleChange}
-              required
-            />
-
-            <input
-              name="courseCode"
-              placeholder="Course Code"
-              value={form.courseCode}
-              onChange={handleChange}
-              required
-            />
-
-            <input
-              name="duration"
-              placeholder="Duration (e.g. 4 Years)"
-              value={form.duration}
-              onChange={handleChange}
-            />
-
-            <textarea
-              name="description"
-              placeholder="Course Description"
-              value={form.description}
-              onChange={handleChange}
-              rows="3"
-            />
-
-            <button type="submit" className="primary-btn">
-              {editingId ? "Update Course" : "Save Course"}
-            </button>
-
-          </form>
-        </div>
-      )}
-
-      <div className="courses-table-panel">
-
-        <div className="courses-toolbar">
-          <h2>All Courses</h2>
 
           <div className="navbar-search">
-            <Search size={18} />
+            <Search size={19} />
 
             <input
+              type="text"
               placeholder="Search courses..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-        </div>
 
-        <div className="table-responsive">
+          <div className="navbar-right">
 
-          <table className="dashboard-table">
+            <button
+              className="notification-btn"
+              aria-label="Notifications"
+            >
+              <Bell size={23} />
+              <span className="notification-count">3</span>
+            </button>
 
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Course Name</th>
-                <th>Course Code</th>
-                <th>Duration</th>
-                <th>Description</th>
-                {isAdmin && <th>Actions</th>}
-              </tr>
-            </thead>
+            <div className="admin-profile">
 
-            <tbody>
+              <div className="admin-avatar">
+                <UserRound size={25} />
+              </div>
 
-              {loading ? (
-                <tr>
-                  <td colSpan={isAdmin ? 6 : 5}>
-                    Loading courses...
-                  </td>
-                </tr>
-              ) : filteredCourses.length === 0 ? (
-                <tr>
-                  <td colSpan={isAdmin ? 6 : 5}>
-                    No courses found.
-                  </td>
-                </tr>
-              ) : (
-                filteredCourses.map((course) => (
-                  <tr key={course.id}>
-                    <td>{course.id}</td>
-                    <td>{course.courseName}</td>
-                    <td>{course.courseCode}</td>
-                    <td>{course.duration}</td>
-                    <td>{course.description}</td>
+              <div>
+                <h4>{adminName}</h4>
+                <span>{isAdmin ? "Administrator" : "User"}</span>
+              </div>
 
-                    {isAdmin && (
-                      <td>
-                        <div className="table-actions">
+            </div>
+          </div>
+        </header>
 
-                          <button
-                            className="edit-btn"
-                            onClick={() => handleEdit(course)}
-                            title="Edit course"
-                          >
-                            <Pencil size={16} />
-                          </button>
+        {/* COURSES CONTENT */}
+        <div className="dashboard-content courses-page">
 
-                          <button
-                            className="delete-btn"
-                            onClick={() => handleDelete(course.id)}
-                            title="Delete course"
-                          >
-                            <Trash2 size={16} />
-                          </button>
+          {/* HEADING */}
+          <div className="courses-heading">
+            <div>
+              <h1>Courses Management</h1>
+              <p>
+                Manage all courses offered by your institution.
+              </p>
+            </div>
 
-                        </div>
-                      </td>
-                    )}
+            {isAdmin && (
+              <button
+                className="primary-btn"
+                onClick={handleAdd}
+              >
+                <Plus size={18} />
+                Add Course
+              </button>
+            )}
+          </div>
+
+          {/* COURSE SUMMARY */}
+          <div className="courses-summary">
+            <BookOpen size={28} />
+
+            <div>
+              <span>Total Courses</span>
+              <h2>{courses.length}</h2>
+            </div>
+          </div>
+
+          {/* ERROR MESSAGE */}
+          {error && (
+            <div className="error-message">
+              {error}
+
+              <button onClick={fetchCourses}>
+                Retry
+              </button>
+            </div>
+          )}
+
+          {/* ADD / EDIT FORM */}
+          {showForm && isAdmin && (
+            <div className="course-form-panel">
+
+              <div className="course-form-heading">
+                <h2>
+                  {editingId !== null
+                    ? "Edit Course"
+                    : "Add New Course"}
+                </h2>
+
+                <button
+                  type="button"
+                  onClick={() => setShowForm(false)}
+                  aria-label="Close form"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              <form
+                onSubmit={handleSubmit}
+                className="course-form"
+              >
+                <input
+                  name="courseName"
+                  placeholder="Course Name"
+                  value={form.courseName}
+                  onChange={handleChange}
+                  required
+                />
+
+                <input
+                  name="courseCode"
+                  placeholder="Course Code"
+                  value={form.courseCode}
+                  onChange={handleChange}
+                  required
+                />
+
+                <input
+                  name="duration"
+                  placeholder="Duration (e.g. 4 Years)"
+                  value={form.duration}
+                  onChange={handleChange}
+                />
+
+                <textarea
+                  name="description"
+                  placeholder="Course Description"
+                  value={form.description}
+                  onChange={handleChange}
+                  rows="3"
+                />
+
+                <button type="submit" className="primary-btn">
+                  {editingId !== null
+                    ? "Update Course"
+                    : "Save Course"}
+                </button>
+              </form>
+            </div>
+          )}
+
+          {/* COURSES TABLE */}
+          <div className="panel courses-table-panel">
+
+            <div className="panel-header courses-toolbar">
+              <h3>All Courses</h3>
+            </div>
+
+            <div className="table-responsive">
+
+              <table className="dashboard-table">
+
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Course Name</th>
+                    <th>Course Code</th>
+                    <th>Duration</th>
+                    <th>Description</th>
+                    {isAdmin && <th>Actions</th>}
                   </tr>
-                ))
-              )}
+                </thead>
 
-            </tbody>
-          </table>
+                <tbody>
+
+                  {loading ? (
+                    <tr>
+                      <td colSpan={isAdmin ? 6 : 5}>
+                        Loading courses...
+                      </td>
+                    </tr>
+                  ) : filteredCourses.length === 0 ? (
+                    <tr>
+                      <td colSpan={isAdmin ? 6 : 5}>
+                        No courses found.
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredCourses.map((course) => (
+                      <tr key={course.id}>
+                        <td>{course.id}</td>
+                        <td>{course.courseName}</td>
+                        <td>{course.courseCode}</td>
+                        <td>{course.duration || "—"}</td>
+                        <td>{course.description || "—"}</td>
+
+                        {isAdmin && (
+                          <td>
+                            <div className="table-actions">
+
+                              <button
+                                className="edit-btn"
+                                onClick={() => handleEdit(course)}
+                                title="Edit course"
+                              >
+                                <Pencil size={16} />
+                              </button>
+
+                              <button
+                                className="delete-btn"
+                                onClick={() => handleDelete(course.id)}
+                                title="Delete course"
+                              >
+                                <Trash2 size={16} />
+                              </button>
+
+                            </div>
+                          </td>
+                        )}
+                      </tr>
+                    ))
+                  )}
+
+                </tbody>
+              </table>
+            </div>
+          </div>
+
         </div>
 
-      </div>
+        {/* FOOTER */}
+        <footer className="dashboard-footer">
+          <span>
+            © 2026 Student Management System. All rights reserved.
+          </span>
+
+          <span>
+            Developed with ❤️ by SMS Team
+          </span>
+        </footer>
+
+      </main>
     </div>
   );
 }

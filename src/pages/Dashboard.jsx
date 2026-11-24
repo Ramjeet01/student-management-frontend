@@ -54,7 +54,8 @@ function Dashboard() {
 
   // Dashboard statistics
   const [stats, setStats] = useState({
-    totalStudents: 0
+    totalStudents: 0,
+    totalCourses:0
   });
 
   // Loading states
@@ -98,7 +99,7 @@ function Dashboard() {
 
       if (
         !data ||
-        typeof data.totalStudents !== "number"
+        typeof data.totalStudents !== "number" || typeof data.totalCourses !== "number"
       ) {
         throw new Error("Invalid dashboard statistics received.");
       }
@@ -153,14 +154,14 @@ function Dashboard() {
   // Dashboard statistics
   const dashboardStats = [
     {
-      title: "Total Students",
-      value: stats.totalStudents,
+      title: "Total Courses",
+      value: stats.totalCourses,
       loading: loadingStats,
-      icon: Users,
-      color: "blue",
-      link: "/students",
-      linkText: "View all students"
-    },
+      icon: BookOpen,
+      color: "green",
+      link: "/courses",
+      linkText: "View all courses"
+    },,
     {
       title: "Total Courses",
       value: "—",
