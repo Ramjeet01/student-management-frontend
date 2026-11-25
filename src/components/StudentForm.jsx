@@ -57,7 +57,7 @@ function StudentForm({ addStudent, editingStudent, updateStudent }) {
     }
 
     if (!allowedSubjects.includes(subject.trim())) {
-      newErrors.subject = "Please enter a valid subject";
+      newErrors.subject = "IIOT|Deep Learning|Machine Learning|Artificial Intelligence|Cloud Computing|Data Science|Computer Networks";
     }
 
     setErrors(newErrors);
