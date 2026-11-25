@@ -7,6 +7,19 @@ function StudentForm({ addStudent, editingStudent, updateStudent }) {
   const [classes, setClasses] = useState("");
   const [section, setSection] = useState("");
   const [subject, setSubject] = useState("");
+  const [errors, setErrors] = useState({});
+
+  const allowedClasses = ["B.Tech", "BCA", "B.Sc", "BA"];
+  const allowedSections = ["A", "B", "C", "D"];
+  const allowedSubjects = [
+    "IIOT",
+    "Deep Learning",
+    "Machine Learning",
+    "Artificial Intelligence",
+    "Cloud Computing",
+    "Data Science",
+    "Computer Networks"
+  ];
 
   useEffect(() => {
     if (editingStudent) {
@@ -14,6 +27,7 @@ function StudentForm({ addStudent, editingStudent, updateStudent }) {
       setClasses(editingStudent.classes || "");
       setSection(editingStudent.section || "");
       setSubject(editingStudent.subject || "");
+      setErrors({});
     } else {
       resetForm();
     }
@@ -24,16 +38,45 @@ function StudentForm({ addStudent, editingStudent, updateStudent }) {
     setClasses("");
     setSection("");
     setSubject("");
+    setErrors({});
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!name.trim()) {
+      newErrors.name = "Student name is required";
+    }
+
+    if (!allowedClasses.includes(classes.trim())) {
+      newErrors.classes = "Class must be B.Tech, BCA, B.Sc, or BA";
+    }
+
+    if (!allowedSections.includes(section.trim())) {
+      newErrors.section = "Section must be A, B, C, or D";
+    }
+
+    if (!allowedSubjects.includes(subject.trim())) {
+      newErrors.subject = "Please enter a valid subject";
+    }
+
+    setErrors(newErrors);
+
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
+    if (!validateForm()) {
+      return;
+    }
+
     const studentData = {
-      name,
-      classes,
-      section,
-      subject
+      name: name.trim(),
+      classes: classes.trim(),
+      section: section.trim(),
+      subject: subject.trim()
     };
 
     try {
@@ -60,36 +103,52 @@ function StudentForm({ addStudent, editingStudent, updateStudent }) {
         name="name"
         placeholder="Student Name"
         value={name}
-        onChange={(event) => setName(event.target.value)}
+        onChange={(event) => {
+          setName(event.target.value);
+          setErrors(prev => ({ ...prev, name: "" }));
+        }}
         required
       />
+      {errors.name && <p className="error-message">{errors.name}</p>}
 
       <input
         type="text"
         name="classes"
-        placeholder="Class"
+        placeholder="Class (B.Tech, BCA, B.Sc, BA)"
         value={classes}
-        onChange={(event) => setClasses(event.target.value)}
+        onChange={(event) => {
+          setClasses(event.target.value);
+          setErrors(prev => ({ ...prev, classes: "" }));
+        }}
         required
       />
+      {errors.classes && <p className="error-message">{errors.classes}</p>}
 
       <input
         type="text"
         name="section"
-        placeholder="Section"
+        placeholder="Section (A, B, C, D)"
         value={section}
-        onChange={(event) => setSection(event.target.value)}
+        onChange={(event) => {
+          setSection(event.target.value);
+          setErrors(prev => ({ ...prev, section: "" }));
+        }}
         required
       />
+      {errors.section && <p className="error-message">{errors.section}</p>}
 
       <input
         type="text"
         name="subject"
         placeholder="Subject"
         value={subject}
-        onChange={(event) => setSubject(event.target.value)}
+        onChange={(event) => {
+          setSubject(event.target.value);
+          setErrors(prev => ({ ...prev, subject: "" }));
+        }}
         required
       />
+      {errors.subject && <p className="error-message">{errors.subject}</p>}
 
       <button type="submit" className="primary-btn">
         {editingStudent ? "Update Student" : "Save Student"}
