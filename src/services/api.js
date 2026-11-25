@@ -27,9 +27,32 @@ export async function apiRequest(path, options = {}) {
     });
 
     if (!response.ok) {
-        const message = await response.text();
+        const contentType = response.headers.get("content-type");
+        let message = "";
+
+        if (contentType?.includes("application/json")) {
+            const data = await response.json();
+
+            message =
+                data.message ||
+                data.detail ||
+                data.title ||
+                data.error ||
+                (data.errors ? Object.values(data.errors).join(", ") : "");
+        } else {
+            message = await response.text();
+        }
+
+        if (response.status === 401 && path === "/auth/login") {
+            message = "Incorrect username or password. Please try again.";
+        }
+
+        if (response.status === 409 && !message) {
+            message = "This information is already registered.";
+        }
+
         throw new Error(
-            message || `Request failed: ${response.status}`
+            message || "Something went wrong. Please try again."
         );
     }
 
