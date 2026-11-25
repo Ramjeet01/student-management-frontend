@@ -12,6 +12,7 @@ export async function apiRequest(path, options = {}) {
     const isPublicAuthRequest =
         path === "/auth/login" ||
         path === "/auth/register" ||
+        path === "/auth/verify-registration" ||
         path === "/auth/forgot-password" ||
         path === "/auth/verify-otp" ||
         path === "/auth/reset-password";

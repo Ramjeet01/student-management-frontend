@@ -12,6 +12,19 @@ export async function register(userData){
 
 }
 
+
+// Verify registration OTP
+export async function verifyRegistration(email, otp) {
+    return await apiRequest(
+        "/auth/verify-registration",
+        {
+            method: "POST",
+            body: JSON.stringify({ email, otp })
+        }
+    );
+}
+
+
 //Login
 export async function login(credentials){
     return await apiRequest(
