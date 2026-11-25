@@ -65,44 +65,53 @@ function LoginPage() {
                     required
                 />
 
+
                 <label>Password</label>
 
                 <div style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px"
+                    position: "relative",
+                    width: "100%",
+                    marginBottom: "10px"
                 }}>
-
                     <input
                         type={showPassword ? "text" : "password"}
                         placeholder="Enter password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        style={{ flex: 1 }}
                         required
+                        style={{
+                            display: "block",
+                            width: "100%",
+                            minWidth: "0",
+                            boxSizing: "border-box",
+                            padding: "13px 45px 13px 13px",
+                            marginBottom: "0",
+                            color: "#111827",
+                            WebkitTextFillColor: "#111827",
+                            backgroundColor: "#ffffff"
+                        }}
                     />
 
                     <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        aria-label={
-                            showPassword ? "Hide password" : "Show password"
-                        }
+                        aria-label={showPassword ? "Hide password" : "Show password"}
                         style={{
-                            padding: "10px",
-                            cursor: "pointer",
+                            position: "absolute",
+                            right: "10px",
+                            top: "50%",
+                            transform: "translateY(-50%)",
+                            padding: "5px",
                             background: "transparent",
-                            color: "inherit",
-                            border: "none"
+                            border: "none",
+                            color: "#111827",
+                            cursor: "pointer"
                         }}
                     >
-                        {showPassword
-                            ? <EyeOff size={20} />
-                            : <Eye size={20} />
-                        }
+                        {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                     </button>
-
                 </div>
+
 
                 <p style={{
                     textAlign: "right",
