@@ -1594,20 +1594,3 @@ body .auth-sidebar .logo-text span {
     grid-template-columns: repeat(2, 1fr);
   }
 }
-
-/* Fix password text visibility on authentication pages */
-
-.auth-form input {
-    color: #111827 !important;
-    -webkit-text-fill-color: #111827 !important;
-    opacity: 1 !important;
-    caret-color: #62459a;
-}
-
-.auth-form input[type="password"],
-.auth-form input[type="text"],
-.auth-form input[type="email"] {
-    background-color: #ffffff !important;
-    color: #111827 !important;
-    -webkit-text-fill-color: #111827 !important;
-}
