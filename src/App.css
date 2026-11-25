@@ -1594,3 +1594,14 @@ body .auth-sidebar .logo-text span {
     grid-template-columns: repeat(2, 1fr);
   }
 }
+.error-message {
+    color: #dc2626;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    margin: 12px 0;
+    text-align: center;
+}
